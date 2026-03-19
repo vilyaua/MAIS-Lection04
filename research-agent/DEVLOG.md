@@ -14,3 +14,32 @@
 - Copied as-is: Dockerfile, docker-compose.yml, .env.example, .gitignore, .dockerignore, example_output/report.md
 - Created ARCHITECTURE.md reflecting the custom ReAct loop design
 - VERSION set to 0.1.0
+
+## 2026-03-19
+
+### 06:00 — Test run: 8 queries from L3
+
+- Ran all 8 test queries from `output/test_queries.txt` against the live server
+- Session reset (`POST /api/reset`) between each query for clean token tracking
+- All 8 queries produced reports successfully — `write_report` was always called
+- Zero retry loops — enhanced prompt's negative constraints prevented failed-call repetition
+
+### 06:35 — L3 vs L4 runtime comparison
+
+- Created `output/L3_vs_L4_comparison.md` — per-query metrics, aggregate stats, report quality analysis
+- Parsed both `agent.log` files for token counts, tool calls, errors, timing
+- Key findings: L4 used 15% fewer total tokens, 34% fewer output tokens, always saved reports, better error recovery
+- L4's enhanced prompt was the biggest driver of quality improvement
+
+### 07:00 — New Session button (`feat/new-session-button`)
+
+- `app.py`: added `POST /api/reset` endpoint — clears `web_messages` and `session_tokens`
+- `app.py`: added "New Session" button in sidebar HTML + `resetSession()` JS handler + CSS
+- `.gitignore`: removed `logs/` so `agent.log` is tracked in git
+- Created PR #1, merged to main
+
+### 07:30 — Documentation
+
+- Created `research-agent/README.md` — setup (Docker + local), usage (web + CLI), architecture, tools, context engineering, system prompt techniques, memory model, L3 vs L4 comparison table
+- Updated root `README.md` — project overview, quick start, links to research-agent/README.md
+- Created `COMPARISON.md` — detailed file-by-file comparison of every L3→L4 change
