@@ -158,6 +158,17 @@ async def info():
     }
 
 
+@app.post("/api/reset")
+async def reset():
+    """Reset session: clear conversation history and token counters."""
+    global session_tokens
+    web_messages.clear()
+    web_messages.append({"role": "system", "content": SYSTEM_PROMPT})
+    session_tokens = {"input": 0, "output": 0, "total": 0}
+    logger.info("Session reset by user")
+    return {"status": "ok"}
+
+
 @app.get("/api/chat")
 async def chat(q: str):
     logger.info("User: %s", q)
@@ -238,11 +249,15 @@ CHAT_HTML = """\
   .input-bar button { padding: 10px 20px; background: #2563eb; color: white;
                       border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
   .input-bar button:disabled { background: #93c5fd; cursor: not-allowed; }
+  .btn-reset { width: 100%; padding: 8px; background: #45475a; color: #cdd6f4; border: none;
+               border-radius: 8px; cursor: pointer; font-size: 13px; }
+  .btn-reset:hover { background: #585b70; }
 </style>
 </head>
 <body>
 <div class="sidebar">
   <h2>Research Agent</h2>
+  <button class="btn-reset" onclick="resetSession()">New Session</button>
   <div class="meta" id="meta">Loading...</div>
   <div class="metric"><div class="label">Input tokens</div><div class="value" id="t-in">0</div></div>
   <div class="metric"><div class="label">Output tokens</div><div class="value" id="t-out">0</div></div>
@@ -280,6 +295,15 @@ CHAT_HTML = """\
   loadReports();
 
   input.addEventListener('keydown', e => { if(e.key==='Enter' && !btn.disabled) send(); });
+
+  function resetSession() {
+    fetch('/api/reset', {method:'POST'}).then(r=>r.json()).then(()=>{
+      msgs.innerHTML = '';
+      updateTokens({input:0, output:0, total:0});
+      loadReports();
+      input.focus();
+    });
+  }
 
   function addMsg(role, html) {
     const d = document.createElement('div');
