@@ -1,5 +1,6 @@
 services:
   research-agent:
+    image: research-agent-react:latest
     build: .
     ports:
       - "8000:8000"
