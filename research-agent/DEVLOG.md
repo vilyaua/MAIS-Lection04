@@ -43,3 +43,21 @@
 - Created `research-agent/README.md` — setup (Docker + local), usage (web + CLI), architecture, tools, context engineering, system prompt techniques, memory model, L3 vs L4 comparison table
 - Updated root `README.md` — project overview, quick start, links to research-agent/README.md
 - Created `COMPARISON.md` — detailed file-by-file comparison of every L3→L4 change
+
+## 2026-03-23
+
+### 13:00 — Add truncation to web_search (`feat/web-search-truncation`)
+
+Addressed teacher feedback: "варто додати truncation у web_search, без нього може непередбачувано забиватись контекст"
+
+- `config.py`: added `max_search_content_length: int = 3000` — separate limit from `max_url_content_length` (8000), since search snippets and full page content have different optimal sizes
+- `config.py`: added `app_name: str = "Research Agent L04"` for `/api/info` identification
+- `tools.py`: added truncation to `web_search` return value using `max_search_content_length`
+- `app.py`: added `app` field to `/api/info` endpoint
+
+### 13:25 — Test run: 10 queries with truncation
+
+- Ran all 10 test queries (8 original + 2 RAG-related from L05 set)
+- All queries succeeded, total: 265,969 tokens in 544s
+- Truncation acts as a safety net — typical search results (~1000 chars) stay under the 3000 limit
+- Biggest token consumer: RAG comparison query (65,812 tokens) due to multiple retries on failed Medium URLs
